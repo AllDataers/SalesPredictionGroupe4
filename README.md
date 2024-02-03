@@ -29,4 +29,4 @@ README.md: Essential information about the project, including setup instructions
 
 ## DATA LOAD STRUCTURE
 
-![Data load structure](SalesPredictionGroupe4\docs\architedctureData.jpg)
+![Data load structure]([SalesPredictionGroupe4\docs\architedctureData.jpg](https://github.com/AllDataers/SalesPredictionGroupe4/blob/korka/project-structure/docs/architedctureData.jpg))
