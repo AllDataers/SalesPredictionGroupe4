@@ -1,7 +1,8 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import pandas as pd
 
 from data_processing.base_features_engineering import FeatureEngineering
+from data_processing.validate_ouput import validate_output
 
 
 class DateFeatureEngineering(FeatureEngineering):
@@ -23,6 +24,7 @@ class DateFeatureEngineering(FeatureEngineering):
         df["hour"] = df[self.date_column_name].dt.hour
         df["month"] = df[self.date_column_name].dt.month
         df["day"] = df[self.date_column_name].dt.day
+        df["day_name"] = df[self.date_column_name].dt.day_name()
         df["year"] = df[self.date_column_name].dt.year
         return df
 
@@ -141,7 +143,7 @@ class FeatureEngineeringPipeline:
             FeatureEngineering
         ] = feature_engineering_steps
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Optional[str]]:
         """
         Performs feature engineering on the input DataFrame.
 
@@ -153,7 +155,10 @@ class FeatureEngineeringPipeline:
         """
         for feature_engineering in self.feature_engineering_steps:
             df = feature_engineering.transform(df)
-        return df
+        validate_df, error = validate_output(df)
+        if error:
+            print(error)
+        return df, error
 
 
 if __name__ == "__main__":
@@ -179,5 +184,5 @@ if __name__ == "__main__":
             AddressFeatureEngineering(address_column_name),
         ]
     )
-    final_df = pipeline.transform(df)
+    final_df, error = pipeline.transform(df)
     print(final_df.head())
