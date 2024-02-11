@@ -1,3 +1,4 @@
+from typing import List, Optional
 import pandas as pd
 from pathlib import Path
 
@@ -11,8 +12,8 @@ class DataLoader:
         self._csv_path: Path = Path(csv_path)
         self.delimiter: str = delimiter
 
-    def load_data(self) -> pd.DataFrame:
-        df = pd.read_csv(self.csv_path, delimiter=self.delimiter)
+    def load_data(self, parse_dates: Optional[List[str]] = None) -> pd.DataFrame:
+        df = pd.read_csv(self.csv_path, delimiter=self.delimiter, parse_dates=parse_dates)
         return df
 
     @property
