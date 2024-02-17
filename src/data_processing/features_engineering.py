@@ -4,6 +4,8 @@ import logging
 
 from data_processing.base_features_engineering import FeatureEngineering
 from data_processing.validate_ouput import validate_output
+from utils.logger import Logging
+
 
 
 class DateFeatureEngineering(FeatureEngineering):
@@ -139,12 +141,15 @@ class DataTypeConverter(FeatureEngineering):
 
 
 class FeatureEngineeringPipeline:
-    def __init__(self, feature_engineering_steps: List[FeatureEngineering]) -> None:
+
+    def __init__(self, feature_engineering_steps: List[FeatureEngineering], logger: logging.Logger) -> None:
         self.feature_engineering_steps: List[
             FeatureEngineering
         ] = feature_engineering_steps
+        self.logger = logger
 
     def transform(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, Optional[str]]:
+
         """
         Performs feature engineering on the input DataFrame.
 
@@ -158,8 +163,8 @@ class FeatureEngineeringPipeline:
             df = feature_engineering.transform(df)
         validate_df, error = validate_output(df)
         if error:
-            logging.error("Une erreur est servenue lor du chargement du dataframe")
-        return df, error
+            self.logger.warning("An error occurred during the dataframe loading.")
+        return validate_df, error
 
 
 if __name__ == "__main__":

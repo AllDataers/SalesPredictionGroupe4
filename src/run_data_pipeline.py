@@ -4,9 +4,8 @@ from argparse import ArgumentParser
 import pandas as pd
 import shutil as sht
 from utils.load_config import load_config
+from utils.logger import Logging
 from utils.csv_to_dataframe import DataLoader
-import logging
-from logging.config import dictConfig
 
 
 from data_processing.features_engineering import FeatureEngineeringPipeline
@@ -20,14 +19,6 @@ from data_processing.features_engineering import (
     DateFeatureEngineering,
     AddressFeatureEngineering,
 )
-
-log_dict = load_config(Path(__file__).parent / "config/log.yaml")
-Path(log_dict["handlers"]["info_file_handler"]["filename"]).parent.mkdir(
-    parents=True, exist_ok=True
-)
-dictConfig(log_dict)
-logger = logging.getLogger(__name__)
-
 
 def parse_args():
     parser = ArgumentParser()
@@ -51,6 +42,7 @@ def parse_args():
 
 
 def main():
+    data_pipeline_logger = Logging("run_data_pipeline").logger
     args = parse_args()
     config = load_config(args.config_path)
     column_to_rename = config.get("column_renaming", {}).get("column_name_dict", {})
@@ -75,33 +67,33 @@ def main():
             SalesColumnAdder(quantity_column, price_column),
             DateFeatureEngineering(date_column),
             AddressFeatureEngineering(address_column_name),
-        ]
+        ], logger=data_pipeline_logger
     )
     csv_files_dir = config.get("data_loader", {}).get("raw_path", "")
     df_list = []
     for csv_file_path in Path(csv_files_dir).glob("*.csv"):
-        logger.info(f"Processing file: {csv_file_path.name}...")
+        data_pipeline_logger.info(f"Processing file: {csv_file_path.name}...")
         try:
             raw_df = DataLoader(csv_file_path).load_data()
             df, _ = transformation_pipeline.transform(df=raw_df)
             df_list.append(df)
-            sht.move(str(csv_file_path), processed_csv_folder)
-            logger.info(f"file: {csv_file_path.name} OK")
+            sht.move(str(csv_file_path), f"{processed_csv_folder}/{csv_file_path.name}")
+            data_pipeline_logger.info(f"file: {csv_file_path.name} OK")
         except Exception as e:
-            logging.info(f"file: {csv_file_path.name} ERROR")
-            logging.error(
-                f"Error while processing {csv_file_path.name}: {e}"
-            )
-            sht.move(str(csv_file_path), error_folder_path)
+            data_pipeline_logger.info(f"file: {csv_file_path.name} ERROR")
+            data_pipeline_logger.error(f"Error while processing {csv_file_path.name}: {e}")
+            sht.move(str(csv_file_path), f"{error_folder_path}/{csv_file_path.name}")
             continue
-    final_df = pd.concat(df_list)
-    final_df.to_csv(output_path, index=False)
-    print(final_df.dtypes)
-    db_name = config.get("data_loader", {}).get("db_name")
-    connector = sqlite_connector(db_name)
-    loadCsv.CsvToSqliteWithPandas(connector).load_csv_into_table(
-        table_name="sales_2019", df=df
-    )
+    if not df_list:
+        data_pipeline_logger.warning("No files to process")
+    else:   
+        final_df = pd.concat(df_list)
+        final_df.to_csv(output_path, index=False)
+        db_name = config.get("data_loader", {}).get("db_name")
+        connector = sqlite_connector(db_name)
+        loadCsv.CsvToSqliteWithPandas(connector, data_pipeline_logger).load_csv_into_table(
+            table_name="sales_2019", df=df
+        )
 
 
 if __name__ == "__main__":

@@ -1,11 +1,14 @@
 import sqlite3
+import logging
 
 import pandas as pd
 
 
 class CsvToSqliteWithPandas:
-    def __init__(self, connector: sqlite3.Connection) -> None:
+    def __init__(self, connector: sqlite3.Connection, logger: logging.Logger) -> None:
         self.connector = connector
+        self.logger = logger
+
 
     def load_csv_into_table(self, df: pd.DataFrame, table_name: str) -> None:
         """
@@ -18,9 +21,11 @@ class CsvToSqliteWithPandas:
             None
         """
         try:
+            self.logger.info(f"Loading data to {table_name} ...")
             with self.connector as connection:
                 df.to_sql(
                     name=table_name, con=connection, if_exists="replace", index=False
                 )
+            self.logger.info(f"Loading data to {table_name} OK")
         except Exception as e:
-            print(f"Error loading data into table '{table_name}': {e}")
+            self.logger.error(f"Error loading data into table '{table_name}': {e}")
