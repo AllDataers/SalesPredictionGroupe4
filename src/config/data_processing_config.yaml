@@ -2,6 +2,8 @@ data_loader:
   raw_path: "data/raw"
   delimiter: ","
   output_path: "data/processed_data/sales_2019.csv"
+  error_folder_path: "data/error_csv_file"
+  processed_csv_folder: "data/processed_csv_file"
 
 data_types_mapping:
   QuantityOrdered: int

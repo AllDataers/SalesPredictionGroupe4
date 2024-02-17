@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional, Tuple
 import pandas as pd
+import logging
 
 from data_processing.base_features_engineering import FeatureEngineering
 from data_processing.validate_ouput import validate_output
@@ -157,7 +158,7 @@ class FeatureEngineeringPipeline:
             df = feature_engineering.transform(df)
         validate_df, error = validate_output(df)
         if error:
-            print(error)
+            logging.error("Une erreur est servenue lor du chargement du dataframe")
         return df, error
 
 
@@ -185,4 +186,4 @@ if __name__ == "__main__":
         ]
     )
     final_df, error = pipeline.transform(df)
-    print(final_df.head())
+    #print(final_df.head())
