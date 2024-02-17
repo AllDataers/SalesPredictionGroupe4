@@ -4,6 +4,7 @@ data_loader:
   output_path: "data/processed_data/sales_2019.csv"
   error_folder_path: "data/error_csv_file"
   processed_csv_folder: "data/processed_csv_file"
+  db_name: "data/databases/sales.sqlite"
 
 data_types_mapping:
   QuantityOrdered: int
@@ -29,3 +30,4 @@ sales_column_adder:
   quantity_column: "QuantityOrdered"
   price_column: "PriceEach"
   sales_column: "Sales"
+

@@ -5,11 +5,13 @@ import pandas as pd
 import shutil as sht
 from utils.load_config import load_config
 from utils.csv_to_dataframe import DataLoader
-import logging 
+import logging
 from logging.config import dictConfig
 
 
 from data_processing.features_engineering import FeatureEngineeringPipeline
+from data_loading import loadCsv
+from utils.db_connector import sqlite_connector
 from data_processing.features_engineering import (
     ColumnRenaming,
     DataCleaner,
@@ -19,8 +21,13 @@ from data_processing.features_engineering import (
     AddressFeatureEngineering,
 )
 
-dictConfig(load_config(Path(__file__).parent / "config/log.yaml"))
+log_dict = load_config(Path(__file__).parent / "config/log.yaml")
+Path(log_dict["handlers"]["info_file_handler"]["filename"]).parent.mkdir(
+    parents=True, exist_ok=True
+)
+dictConfig(log_dict)
 logger = logging.getLogger(__name__)
+
 
 def parse_args():
     parser = ArgumentParser()
@@ -31,6 +38,14 @@ def parse_args():
         required=False,
         help="Path to the input config file.",
         default=Path(__file__).parent / "config/data_processing_config.yaml",
+    )
+    parser.add_argument(
+        "--csv_path",
+        "-cp",
+        type=str,
+        required=False,
+        help="Path to the input config file.",
+        default="data/processed_data/sales_2019.csv",
     )
     return parser.parse_args()
 
@@ -50,6 +65,8 @@ def main():
     date_column = date_feature_engineering.get("date_column_name", "")
     error_folder_path = config.get("data_loader").get("error_folder_path")
     processed_csv_folder = config.get("data_loader").get("processed_csv_folder")
+    Path(processed_csv_folder).mkdir(parents=True, exist_ok=True)
+    Path(error_folder_path).mkdir(parents=True, exist_ok=True)
     transformation_pipeline = FeatureEngineeringPipeline(
         [
             DataCleaner(),
@@ -68,18 +85,24 @@ def main():
             raw_df = DataLoader(csv_file_path).load_data()
             df, _ = transformation_pipeline.transform(df=raw_df)
             df_list.append(df)
-            sht.move(csv_file_path, processed_csv_folder)
+            sht.move(str(csv_file_path), processed_csv_folder)
             logger.info(f"file: {csv_file_path.name} OK")
         except Exception as e:
             logging.info(f"file: {csv_file_path.name} ERROR")
-            logging.error(f"Une erreur est survenue avec le fichier {csv_file_path.name}: {e}")
-            sht.move(csv_file_path, error_folder_path)
+            logging.error(
+                f"Error while processing {csv_file_path.name}: {e}"
+            )
+            sht.move(str(csv_file_path), error_folder_path)
             continue
     final_df = pd.concat(df_list)
     final_df.to_csv(output_path, index=False)
     print(final_df.dtypes)
+    db_name = config.get("data_loader", {}).get("db_name")
+    connector = sqlite_connector(db_name)
+    loadCsv.CsvToSqliteWithPandas(connector).load_csv_into_table(
+        table_name="sales_2019", df=df
+    )
 
 
 if __name__ == "__main__":
-    print(Path(__file__).parent)
     main()

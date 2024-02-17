@@ -19,6 +19,8 @@ class CsvToSqliteWithPandas:
         """
         try:
             with self.connector as connection:
-                df.to_sql(name=table_name, con=connection, if_exists="replace", index=False)
+                df.to_sql(
+                    name=table_name, con=connection, if_exists="replace", index=False
+                )
         except Exception as e:
             print(f"Error loading data into table '{table_name}': {e}")
