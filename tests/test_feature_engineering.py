@@ -1,11 +1,13 @@
 import unittest
-import pandas as pd
-from src.data_processing.features_engineering import (
-    DateFeatureEngineering,
-    AddressFeatureEngineering,
-    FeatureEngineeringPipeline,
-)
+import sys
 
+sys.path.append('c:/alldaters/salespredictiongroupe4')
+
+import pandas as pd
+from src.utils.logger import Logging
+from src.data_processing.features_engineering import DateFeatureEngineering
+from src.data_processing.features_engineering import AddressFeatureEngineering
+from src.data_processing.features_engineering import FeatureEngineeringPipeline
 
 class TestFeatureEngineering(unittest.TestCase):
     def setUp(self):
@@ -24,7 +26,7 @@ class TestFeatureEngineering(unittest.TestCase):
 
     def test_date_feature_engineering(self):
         # Test DateFeatureEngineering.transform
-        transformer = DateFeatureEngineering()
+        transformer = DateFeatureEngineering(date_column_name="OrderDate")
         transformed_df = transformer.transform(self.df_date.copy())
         self.assertTrue("hour" in transformed_df.columns)
         self.assertTrue("month" in transformed_df.columns)
@@ -37,7 +39,7 @@ class TestFeatureEngineering(unittest.TestCase):
 
     def test_address_feature_engineering(self):
         # Test AddressFeatureEngineering.transform
-        transformer = AddressFeatureEngineering()
+        transformer = AddressFeatureEngineering(address_column_name="address")
         transformed_df = transformer.transform(self.df_address.copy())
         self.assertTrue("street_name" in transformed_df.columns)
         self.assertTrue("street_number" in transformed_df.columns)
@@ -52,11 +54,14 @@ class TestFeatureEngineering(unittest.TestCase):
 
     def test_pipeline(self):
         # Test FeatureEngineeringPipeline with both Date and Address feature engineering
-        pipeline = FeatureEngineeringPipeline()
-        pipeline.add_feature_engineering_step(DateFeatureEngineering())
-        pipeline.add_feature_engineering_step(AddressFeatureEngineering())
+        steps = [
+            DateFeatureEngineering(date_column_name="OrderDate"),
+            AddressFeatureEngineering(address_column_name="address"),
+        ]
+        pipeline = FeatureEngineeringPipeline(logger=Logging(name="test_pipeline"),
+                                              feature_engineering_steps=steps)
         df_combined = pd.concat([self.df_date, self.df_address], axis=1)
-        transformed_df = pipeline.transform(df_combined.copy())
+        transformed_df, _ = pipeline.transform(df_combined.copy())
         # Check if all expected columns are present
         expected_columns = [
             "hour",
@@ -74,4 +79,6 @@ class TestFeatureEngineering(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    import sys
+    print(sys.path)
     unittest.main()

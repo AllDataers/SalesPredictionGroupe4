@@ -2,7 +2,7 @@ import logging
 from logging.config import dictConfig
 from utils.load_config import load_config
 from pathlib import Path
-import executor  
+
 
 class Logging:
     def __init__(self, name):
