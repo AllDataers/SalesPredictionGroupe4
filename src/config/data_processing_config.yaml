@@ -20,7 +20,7 @@ column_renaming:
 
 address_feature_engineering:
   address_column_name: "PurchaseAddress"
-  target_columns: ["StreetName", "StreetNumber", "City", "State", "ZipCode"]
+  target_columns: ["StreetAddress", "CityName", "ZipAddress"]
   delimiter: ", "
 
 date_feature_engineering:

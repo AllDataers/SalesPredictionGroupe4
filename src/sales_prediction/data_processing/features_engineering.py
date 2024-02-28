@@ -24,11 +24,11 @@ class DateFeatureEngineering(FeatureEngineering):
         df[self.date_column_name] = pd.to_datetime(
             df[self.date_column_name], format="%m/%d/%y %H:%M"
         )
-        df["hour"] = df[self.date_column_name].dt.hour
-        df["month"] = df[self.date_column_name].dt.month
-        df["day"] = df[self.date_column_name].dt.day
-        df["day_name"] = df[self.date_column_name].dt.day_name()
-        df["year"] = df[self.date_column_name].dt.year
+        df["Hour"] = df[self.date_column_name].dt.hour
+        df["Month"] = df[self.date_column_name].dt.month
+        df["Day"] = df[self.date_column_name].dt.day
+        df["DayName"] = df[self.date_column_name].dt.day_name()
+        df["Year"] = df[self.date_column_name].dt.year
         return df
 
 
@@ -45,11 +45,7 @@ class AddressFeatureEngineering(FeatureEngineering):
         if target_columns is None:
             if target_columns is None:
                 target_columns = [
-                    "street_name",
-                    "street_number",
-                    "city",
-                    "state",
-                    "zip_code",
+                    "StreetAddress", "CityName", "ZipAddress",
                 ]
         self.target_columns: List[str] = target_columns
 
@@ -57,6 +53,12 @@ class AddressFeatureEngineering(FeatureEngineering):
         splits = df[self.address_column_name].str.split(self.delimiter, expand=True)
         num_columns = min(len(self.target_columns), splits.shape[1])
         df[self.target_columns[:num_columns]] = splits.iloc[:, :num_columns]
+        street_df = df["StreetAddress"].str.split(" ")
+        df["StreetName"] = street_df.str[1:].str.join(" ")
+        df["StreetNumber"] = street_df.str[0]
+        zip_df = df["ZipAddress"].str.split(" ")
+        df["ZipCode"] = zip_df.str[1]
+        df["StateCode"] = zip_df.str[0]
         return df
 
 

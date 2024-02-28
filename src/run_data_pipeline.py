@@ -55,6 +55,7 @@ def main():
     price_column = sales_column_adder.get("price_column", "")
     address_feature_engineering = config.get("address_feature_engineering", {})
     address_column_name = address_feature_engineering.get("address_column_name", "")
+    target_columns = address_feature_engineering.get("target_columns", [])
     date_feature_engineering = config.get("date_feature_engineering", {})
     date_column = date_feature_engineering.get("date_column_name", "")
     error_folder_path = config.get("data_loader").get("error_folder_path")
@@ -68,7 +69,7 @@ def main():
             DataTypeConverter(data_types_map),
             SalesColumnAdder(quantity_column, price_column),
             DateFeatureEngineering(date_column),
-            AddressFeatureEngineering(address_column_name),
+            AddressFeatureEngineering(address_column_name, target_columns),
         ], logger=data_pipeline_logger
     )
     csv_files_dir = config.get("data_loader", {}).get("raw_path", "")
