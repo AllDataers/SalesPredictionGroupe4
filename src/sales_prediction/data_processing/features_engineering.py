@@ -5,7 +5,7 @@ import logging
 from data_processing.base_features_engineering import FeatureEngineering
 from data_processing.validate_ouput import validate_output
 from utils.logger import Logging
-
+from utils.load_config import load_config
 
 
 class DateFeatureEngineering(FeatureEngineering):
@@ -168,6 +168,7 @@ class FeatureEngineeringPipeline:
 
 
 if __name__ == "__main__":
+    log_dict = load_config("src/config/log.yaml")
     column_to_rename = {
         "Order ID": "OrderID",
         "Quantity Ordered": "QuantityOrdered",
@@ -188,7 +189,8 @@ if __name__ == "__main__":
             SalesColumnAdder(quantity_column, "PriceEach"),
             DateFeatureEngineering(date_column),
             AddressFeatureEngineering(address_column_name),
-        ]
+        ],
+        logger=Logging(name="test", log_dict=log_dict).logger,
     )
     final_df, error = pipeline.transform(df)
-    # print(final_df.head())
+    print(final_df.head())

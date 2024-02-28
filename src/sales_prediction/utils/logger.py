@@ -1,12 +1,17 @@
 import logging
 from logging.config import dictConfig
-from utils.load_config import load_config
 from pathlib import Path
 
 
 class Logging:
-    def __init__(self, name):
-        log_dict = load_config(Path(__file__).parent / "config/log.yaml")
+    def __init__(self, name: str, log_dict: dict):
+        """
+        Initializes the Logging class.
+
+        Args:
+            name (str): the name of the logger
+            log_dict (dict): the log dict
+        """
         Path(log_dict["handlers"]["info_file_handler"]["filename"]).parent.mkdir(
             parents=True, exist_ok=True
         )
