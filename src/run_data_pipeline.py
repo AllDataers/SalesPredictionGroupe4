@@ -3,15 +3,15 @@ from argparse import ArgumentParser
 
 import pandas as pd
 import shutil as sht
-from utils.load_config import load_config
-from utils.logger import Logging
-from utils.csv_to_dataframe import DataLoader
+from sales_prediction.utils.load_config import load_config
+from sales_prediction.utils.logger import Logging
+from sales_prediction.utils.csv_to_dataframe import DataLoader
 
 
-from data_processing.features_engineering import FeatureEngineeringPipeline
-from data_loading import loadCsv
-from utils.db_connector import sqlite_connector
-from data_processing.features_engineering import (
+from sales_prediction.data_processing.features_engineering import FeatureEngineeringPipeline
+from sales_prediction.data_loading import loadCsv
+from sales_prediction.utils.db_connector import sqlite_connector
+from sales_prediction.data_processing.features_engineering import (
     ColumnRenaming,
     DataCleaner,
     DataTypeConverter,
@@ -19,6 +19,7 @@ from data_processing.features_engineering import (
     DateFeatureEngineering,
     AddressFeatureEngineering,
 )
+
 
 def parse_args():
     parser = ArgumentParser()
@@ -42,7 +43,8 @@ def parse_args():
 
 
 def main():
-    data_pipeline_logger = Logging("run_data_pipeline").logger
+    log_dict = load_config("src/config/log.yaml")
+    data_pipeline_logger = Logging(name="run_data_pipeline", log_dict=log_dict).logger
     args = parse_args()
     config = load_config(args.config_path)
     column_to_rename = config.get("column_renaming", {}).get("column_name_dict", {})
@@ -86,7 +88,7 @@ def main():
             continue
     if not df_list:
         data_pipeline_logger.warning("No files to process")
-    else:   
+    else:
         final_df = pd.concat(df_list)
         final_df.to_csv(output_path, index=False)
         db_name = config.get("data_loader", {}).get("db_name")

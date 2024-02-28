@@ -1,17 +1,17 @@
 import unittest
-import sys
-
-sys.path.append('c:/alldaters/salespredictiongroupe4')
-
 import pandas as pd
-from src.utils.logger import Logging
-from src.data_processing.features_engineering import DateFeatureEngineering
-from src.data_processing.features_engineering import AddressFeatureEngineering
-from src.data_processing.features_engineering import FeatureEngineeringPipeline
+
+from sales_prediction.utils.logger import Logging
+from sales_prediction.data_processing.features_engineering import DateFeatureEngineering
+from sales_prediction.data_processing.features_engineering import AddressFeatureEngineering
+from sales_prediction.data_processing.features_engineering import FeatureEngineeringPipeline
+from sales_prediction.utils.load_config import load_config
+
 
 class TestFeatureEngineering(unittest.TestCase):
     def setUp(self):
-        # Setup code here (if needed, to prepare the environment before each test)
+        log_dict = load_config("src/config/log.yaml")
+        self.logger = Logging(name="test_feature_engineering", log_dict=log_dict).logger
         self.date_data = {
             "OrderDate": ["01/01/20 10:00", "02/01/20 11:00"],
         }
@@ -58,7 +58,7 @@ class TestFeatureEngineering(unittest.TestCase):
             DateFeatureEngineering(date_column_name="OrderDate"),
             AddressFeatureEngineering(address_column_name="address"),
         ]
-        pipeline = FeatureEngineeringPipeline(logger=Logging(name="test_pipeline"),
+        pipeline = FeatureEngineeringPipeline(logger=self.logger,
                                               feature_engineering_steps=steps)
         df_combined = pd.concat([self.df_date, self.df_address], axis=1)
         transformed_df, _ = pipeline.transform(df_combined.copy())
