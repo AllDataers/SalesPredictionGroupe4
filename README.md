@@ -41,6 +41,8 @@ The following list describes the project structure:
 
 `README.md`: Essential information about the project, including setup instructions, how to use the project, and any additional details required to understand and run the code.
 
+Install from source: `pip install -e .`
+
 ## DATA LOAD STRUCTURE
 
 ![Data load structure](docs/architedctureData.jpg)
