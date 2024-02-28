@@ -1,0 +1,33 @@
+data_loader:
+  raw_path: "data/raw"
+  delimiter: ","
+  output_path: "data/processed_data/sales_2019.csv"
+  error_folder_path: "data/error_csv_file"
+  processed_csv_folder: "data/processed_csv_file"
+  db_name: "data/databases/sales.sqlite"
+
+data_types_mapping:
+  QuantityOrdered: int
+  PriceEach: float
+
+column_renaming:
+  column_name_dict:
+    Order ID: OrderID
+    Quantity Ordered: QuantityOrdered
+    Price Each: PriceEach
+    Order Date: OrderDate
+    Purchase Address: PurchaseAddress
+
+address_feature_engineering:
+  address_column_name: "PurchaseAddress"
+  target_columns: ["StreetAddress", "CityName", "ZipAddress"]
+  delimiter: ", "
+
+date_feature_engineering:
+  date_column_name: "OrderDate"
+
+sales_column_adder:
+  quantity_column: "QuantityOrdered"
+  price_column: "PriceEach"
+  sales_column: "Sales"
+
