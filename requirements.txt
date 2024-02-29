@@ -1,2 +1,4 @@
-Pandas
-Numpy
+pandas==1.5.3
+pydantic==1.10.8
+bokeh==3.3.4
+seaborn==0.12.2
