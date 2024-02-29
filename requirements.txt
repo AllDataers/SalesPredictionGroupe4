@@ -4,3 +4,6 @@ bokeh==3.3.4
 seaborn==0.12
 pandas==1.5.3
 pydantic==1.1
+geocoder==1.38.1
+folium==0.15.1
+geopy==2.4.1
