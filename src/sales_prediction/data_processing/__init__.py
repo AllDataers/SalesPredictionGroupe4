@@ -1,5 +1,5 @@
-from data_processing.features_engineering import FeatureEngineeringPipeline
-from data_processing.features_engineering import (
+from sales_prediction.data_processing.features_engineering import FeatureEngineeringPipeline
+from sales_prediction.data_processing.features_engineering import (
     ColumnRenaming,
     DataCleaner,
     DataTypeConverter,
