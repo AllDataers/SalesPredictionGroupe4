@@ -9,7 +9,6 @@ class CsvToSqliteWithPandas:
         self.connector = connector
         self.logger = logger
 
-
     def load_csv_into_table(self, df: pd.DataFrame, table_name: str) -> None:
         """
         Load a pandas DataFrame into a SQLite table
