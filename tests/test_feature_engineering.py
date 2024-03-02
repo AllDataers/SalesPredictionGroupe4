@@ -41,15 +41,16 @@ class TestFeatureEngineering(unittest.TestCase):
         # Test AddressFeatureEngineering.transform
         transformer = AddressFeatureEngineering(address_column_name="Address")
         transformed_df = transformer.transform(self.df_address.copy())
+        print(transformed_df.columns)
         self.assertTrue("StreetName" in transformed_df.columns)
         self.assertTrue("StreetNumber" in transformed_df.columns)
-        self.assertTrue("City" in transformed_df.columns)
-        self.assertTrue("Ctate" in transformed_df.columns)
+        self.assertTrue("CityName" in transformed_df.columns)
+        self.assertTrue("StateCode" in transformed_df.columns)
         self.assertTrue("ZipCode" in transformed_df.columns)
         self.assertEqual(transformed_df["StreetName"].iloc[0], "123 Apple St")
         self.assertEqual(transformed_df["StreetNumber"].iloc[0], "101")
-        self.assertEqual(transformed_df["City"].iloc[0], "Cupertino")
-        self.assertEqual(transformed_df["State"].iloc[0], "CA")
+        self.assertEqual(transformed_df["CityName"].iloc[0], "Cupertino")
+        self.assertEqual(transformed_df["StateCode"].iloc[0], "CA")
         self.assertEqual(transformed_df["ZipCode"].iloc[0], "95014")
 
     def test_pipeline(self):
@@ -70,8 +71,8 @@ class TestFeatureEngineering(unittest.TestCase):
             "Year",
             "StreetName",
             "StreetNumber",
-            "City",
-            "State",
+            "CityName",
+            "StateCode",
             "ZipCode",
         ]
         for column in expected_columns:
