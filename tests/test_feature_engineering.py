@@ -1,17 +1,15 @@
 import unittest
 import pandas as pd
 
-from sales_prediction.utils.logger import Logging
+from logging import Logger
 from sales_prediction.data_processing.features_engineering import DateFeatureEngineering
 from sales_prediction.data_processing.features_engineering import AddressFeatureEngineering
 from sales_prediction.data_processing.features_engineering import FeatureEngineeringPipeline
-from sales_prediction.utils.load_config import load_config
 
 
 class TestFeatureEngineering(unittest.TestCase):
     def setUp(self):
-        log_dict = load_config("src/config/log.yaml")
-        self.logger = Logging(name="test_feature_engineering", log_dict=log_dict).logger
+        self.logger = Logger(__name__)
         self.date_data = {
             "OrderDate": ["01/01/20 10:00", "02/01/20 11:00"],
         }
