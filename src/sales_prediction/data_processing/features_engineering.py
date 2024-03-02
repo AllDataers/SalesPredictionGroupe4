@@ -2,10 +2,10 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 import logging
 
-from data_processing.base_features_engineering import FeatureEngineering
-from data_processing.validate_ouput import validate_output
-from utils.logger import Logging
-from utils.load_config import load_config
+from sales_prediction.data_processing.base_features_engineering import FeatureEngineering
+from sales_prediction.data_processing.validate_ouput import validate_output
+from sales_prediction.utils.logger import Logging
+from sales_prediction.utils.load_config import load_config
 
 
 class DateFeatureEngineering(FeatureEngineering):
