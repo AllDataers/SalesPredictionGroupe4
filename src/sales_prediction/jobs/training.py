@@ -1,5 +1,4 @@
 from sales_prediction.training_pipeline.train import BaseTrainingPipeline, ModelEvaluator
-from sales_prediction.data_processing.features_engineering import FeatureEngineeringPipeline
 from sales_prediction.training_pipeline.data_prep import prepare_data
 
 
