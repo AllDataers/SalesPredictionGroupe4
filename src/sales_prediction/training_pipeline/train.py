@@ -11,11 +11,7 @@ from sktime.performance_metrics.forecasting import (
 
 class BaseTrainingPipeline(ABC):
     @abstractmethod
-    def train(self):
-        pass
-
-    @abstractmethod
-    def evaluate(self):
+    def fit(self):
         pass
 
     @abstractmethod
@@ -29,7 +25,7 @@ class TrainingPipeline(BaseTrainingPipeline):
         self.train_df = train_df
         self.test_df = test_df
         
-    def train(self):
+    def fit(self):
         """
         Train the forecasting pipeline
 
