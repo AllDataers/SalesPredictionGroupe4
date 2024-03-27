@@ -5,7 +5,7 @@ from typing import Dict
 from sktime.performance_metrics.forecasting import (
     mean_squared_percentage_error,
     mean_absolute_percentage_error,
-    mean_absolute_error
+    mean_absolute_error,
 )
 
 
@@ -20,11 +20,10 @@ class BaseTrainingPipeline(ABC):
 
 
 class TrainingPipeline(BaseTrainingPipeline):
-    def __init__(self, forecaster, train_df, test_df):
+    def __init__(self, forecaster, train_df: pd.DataFrame):
         self.forecaster = forecaster
         self.train_df = train_df
-        self.test_df = test_df
-        
+
     def fit(self):
         """
         Train the forecasting pipeline
@@ -36,9 +35,9 @@ class TrainingPipeline(BaseTrainingPipeline):
         Returns:
             the fitted pipeline
         """
-        self._pipeline = self.forecastter.fit(self.train_df)
+        self._pipeline = self.forecaster.fit(self.train_df)
         return self
-    
+
     def forecast(self, fh: int):
         """
         Forecast for the next `fh` periods
@@ -54,22 +53,17 @@ class TrainingPipeline(BaseTrainingPipeline):
 
 
 class ModelEvaluator:
-    def __init__(self, forecaster):
-        self.forecaster = forecaster
-
-    def evaluate(self, test_df: pd.DataFrame) -> Dict:
+    def evaluate(self, test_df: pd.DataFrame, predictions: pd.DataFrame) -> Dict:
         """
         Evaluate the forecasting pipeline
 
         Args:
-            forecaster (ForecastingPipeline): The forecasting pipeline
-            train_df (pd.DataFrame): The training data
+            prediction (pd.DataFrame): The predicted data
             test_df (pd.DataFrame): The test data
 
         Returns:
             pd.DataFrame: The evaluation metrics
         """
-        predictions = self.forecaster.predict(test_df)
 
         metrics = {
             "mse": mean_squared_percentage_error(test_df, predictions),
