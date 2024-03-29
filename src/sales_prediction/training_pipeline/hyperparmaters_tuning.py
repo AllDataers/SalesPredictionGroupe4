@@ -22,15 +22,15 @@ class GridSearchTuning(AbstractTuningHyperParams):
     def fit(self, y_train):
         search_cv = ForecastingGridSearchCV(forecaster=self.forecaster, cv=self.cv,
                                             param_grid=self.param_grid,
-                                            scorer=self.metric)
+                                            scoring=self.metric)
         search_cv.fit(y_train)
-        return search_cv
+        return self
 
 
 class RandomizedSearchTuning(AbstractTuningHyperParams):
     def fit(self, y_train):
         search_cv = ForecastingRandomizedSearchCV(forecaster=self.forecaster, cv=self.cv,
                                                   param_distributions=self.param_grid,
-                                                  scorer=self.metric)
+                                                  scoring=self.metric)
         search_cv.fit(y_train)
-        return search_cv
+        return self
