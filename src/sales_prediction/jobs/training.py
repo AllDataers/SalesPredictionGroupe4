@@ -6,6 +6,7 @@ from sales_prediction.training_pipeline.train import (
     TrainingPipeline,
     ModelEvaluator,
 )
+from sales_prediction.utils.registries import ModelRegistry
 from sales_prediction.training_pipeline.data_prep import prepare_data
 from sales_prediction.training_pipeline.modelling import create_model
 from sales_prediction.utils import load_config
@@ -42,12 +43,14 @@ def main():
     config = load_config.load_config(args.config_path)
     df = pd.read_csv(config.get("csv_path"), parse_dates=["OrderDate"])
     forecaster = create_model()
+    print(forecaster.is_fitted)
     df_train, df_test = prepare_data(df)
     train_pipeline = TrainingPipeline(forecaster, df_train)
     fh = ForecastingHorizon(df_test.index, is_relative=False)
     metrics = ModelEvaluator()
     train_job = TrainingJob(train_pipeline, metrics)
     train_job.run()
+    ModelRegistry.save_model(train_pipeline, config.get("model_path2"))
     predictions = train_pipeline.forecast(fh)
     metrics = train_job.evaluate(df_test=df_test, predictions=predictions)
     print(metrics)
