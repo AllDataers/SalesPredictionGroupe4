@@ -1,7 +1,7 @@
 import pandas as pd
 from abc import ABC, abstractmethod
 from typing import Dict
-
+import mlflow
 from sktime.performance_metrics.forecasting import (
     mean_squared_percentage_error,
     mean_absolute_percentage_error,
@@ -70,4 +70,6 @@ class ModelEvaluator:
             "mape": mean_absolute_percentage_error(test_df, predictions),
             "mae": mean_absolute_error(test_df, predictions),
         }
+        for metric_name, metric_value in metrics.items():
+            mlflow.log_metric(metric_name, metric_value)
         return metrics

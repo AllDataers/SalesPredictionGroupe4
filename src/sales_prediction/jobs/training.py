@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import mlflow
 import pandas as pd
 from sktime.forecasting.base import ForecastingHorizon
 from sales_prediction.schema_validator.validate_time_series import validate_time_series
@@ -42,6 +43,7 @@ def cli():
 def main():
     args = cli()
     config = load_config.load_config(args.config_path)
+    experiment_name = config.get("experiment_name")
     df = pd.read_csv(config.get("csv_path"), parse_dates=["OrderDate"])
     forecaster = create_model()
     df_train, df_test = prepare_data(df)
@@ -50,12 +52,20 @@ def main():
     fh = ForecastingHorizon(df_test.index, is_relative=False)
     metrics = ModelEvaluator()
     train_job = TrainingJob(train_pipeline, metrics)
-    train_job.run()
-    ModelRegistry.save_model(train_pipeline, config.get("model_path2"))
-    predictions = train_pipeline.forecast(fh)
-    print(type(predictions))
-    metrics = train_job.evaluate(df_test=df_test, predictions=predictions)
-    print(metrics)
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+    if experiment is not None:
+        experiment_id = experiment.experiment_id
+    else:
+        experiment_id = mlflow.create_experiment(experiment_name)
+
+    mlflow.set_experiment(experiment_id)
+    with mlflow.start_run():
+        mlflow.log_params(config)
+        train_job.run()
+        ModelRegistry.save_model(train_pipeline, config.get("model_path2"))
+        predictions = train_pipeline.forecast(fh)
+        metrics = train_job.evaluate(df_test=df_test, predictions=predictions)
+        print(metrics)
 
 
 if __name__ == "__main__":
