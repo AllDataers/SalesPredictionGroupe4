@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import pandas as pd
 from sktime.forecasting.base import ForecastingHorizon
+from sales_prediction.schema_validator.validate_time_series import validate_time_series
 from sales_prediction.training_pipeline.train import (
     BaseTrainingPipeline,
     TrainingPipeline,
@@ -20,7 +21,7 @@ class TrainingJob:
     def run(self):
         self.train_pipeline.fit()
 
-    def evaluate(self, df_test: pd.DataFrame, predictions: pd.DataFrame):
+    def evaluate(self, df_test: pd.Series, predictions: pd.Series):
         metrics = self.metrics.evaluate(df_test, predictions)
         return metrics
 
@@ -43,8 +44,8 @@ def main():
     config = load_config.load_config(args.config_path)
     df = pd.read_csv(config.get("csv_path"), parse_dates=["OrderDate"])
     forecaster = create_model()
-    print(forecaster.is_fitted)
     df_train, df_test = prepare_data(df)
+    df_train, errors_train = validate_time_series(df_train)
     train_pipeline = TrainingPipeline(forecaster, df_train)
     fh = ForecastingHorizon(df_test.index, is_relative=False)
     metrics = ModelEvaluator()
@@ -52,6 +53,7 @@ def main():
     train_job.run()
     ModelRegistry.save_model(train_pipeline, config.get("model_path2"))
     predictions = train_pipeline.forecast(fh)
+    print(type(predictions))
     metrics = train_job.evaluate(df_test=df_test, predictions=predictions)
     print(metrics)
 

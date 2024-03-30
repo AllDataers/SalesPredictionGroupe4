@@ -1,7 +1,7 @@
 from sktime.transformations.series.difference import Differencer
 from sktime.transformations.series.detrend import Deseasonalizer
 from sklearn.ensemble import HistGradientBoostingRegressor
-from sktime.forecasting.compose import make_reduction, ForecastingPipeline
+from sktime.forecasting.compose import make_reduction
 from sktime.forecasting.compose import TransformedTargetForecaster
 
 

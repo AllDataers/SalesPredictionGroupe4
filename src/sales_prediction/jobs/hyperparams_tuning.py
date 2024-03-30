@@ -1,8 +1,11 @@
 from argparse import ArgumentParser
+from typing import Optional, Dict
 import pandas as pd
+from sktime.performance_metrics.base import BaseMetric
 from sktime.performance_metrics.forecasting import mean_absolute_error
 from sktime.forecasting.model_selection import ExpandingWindowSplitter
 from sktime.forecasting.base import ForecastingHorizon
+from sktime.forecasting.compose import TransformedTargetForecaster
 from sktime.forecasting.model_selection import (
     ForecastingGridSearchCV,
     ForecastingRandomizedSearchCV,
@@ -15,7 +18,12 @@ from sales_prediction.utils import load_config
 
 class TuningHyperParamsJob:
     def __init__(
-        self, forecaster, cv, param_grid, metric=None, searchers: str = "grid"
+        self,
+        forecaster: TransformedTargetForecaster,
+        cv: ExpandingWindowSplitter,
+        param_grid: Dict[str, str],
+        metric: Optional[BaseMetric] = None,
+        searchers: Optional[str] = "grid",
     ):
         self.forecaster = forecaster
         self.cv = cv

@@ -20,7 +20,7 @@ class BaseTrainingPipeline(ABC):
 
 
 class TrainingPipeline(BaseTrainingPipeline):
-    def __init__(self, forecaster, train_df: pd.DataFrame):
+    def __init__(self, forecaster, train_df: pd.Series):
         self.forecaster = forecaster
         self.train_df = train_df
 
@@ -53,7 +53,7 @@ class TrainingPipeline(BaseTrainingPipeline):
 
 
 class ModelEvaluator:
-    def evaluate(self, test_df: pd.DataFrame, predictions: pd.DataFrame) -> Dict:
+    def evaluate(self, test_df: pd.Series, predictions: pd.Series) -> Dict[str, float]:
         """
         Evaluate the forecasting pipeline
 
