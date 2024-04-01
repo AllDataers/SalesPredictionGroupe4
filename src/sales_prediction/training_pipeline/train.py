@@ -36,7 +36,7 @@ class TrainingPipeline(BaseTrainingPipeline):
             the fitted pipeline
         """
         self._pipeline = self.forecaster.fit(self.train_df)
-        return self
+        return self._pipeline
 
     def forecast(self, fh: int):
         """
