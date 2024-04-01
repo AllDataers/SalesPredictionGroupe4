@@ -11,6 +11,6 @@ flavors:
     loader_module: sktime.utils.mlflow_sktime
     model_path: model
     python_version: 3.9.16
-mlflow_version: 2.4.2
-model_uuid: 7b0e8442cb744955bce344b5a9d637ef
-utc_time_created: '2024-03-29 21:52:37.332260'
+mlflow_version: 2.11.3
+model_uuid: 0d94ddfbe32a4527b4f2b361baa75a68
+utc_time_created: '2024-04-01 11:30:23.466739'

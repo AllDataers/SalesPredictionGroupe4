@@ -43,6 +43,8 @@ The following list describes the project structure:
 
 Install from source: `pip install -e .`
 
+Run the streamlit app: `streamlit run main.py`
+
 ## DATA LOAD STRUCTURE
 
 ![Data load structure](docs/architedctureData.jpg)
