@@ -14,6 +14,7 @@ from streamlit_folium import st_folium
 st.set_page_config("EDA", "📊", layout="wide")
 st.title("Sales Dashboard - 2019")
 
+
 def get_df_by_city(df: pd.DataFrame, cities: list):
     return df[df["CityName"].isin(cities)]
 
@@ -176,15 +177,19 @@ with st.sidebar:
     diff_product_df = calculate_difference(
         df_city, "Month", "Sales", "Product", [11, 12]
     )
-    color = alt.Color("Sales", scale=alt.Scale(scheme="spectral"), legend=None, type="quantitative")
-    bars = (alt.Chart(data=sales_by_day.sort_values(by="Sales", ascending=False))
+    color = alt.Color(
+        "Sales", scale=alt.Scale(scheme="spectral"), legend=None, type="quantitative"
+    )
+    bars = (
+        (
+            alt.Chart(data=sales_by_day.sort_values(by="Sales", ascending=False))
             .mark_bar()
-            .encode(y=alt.Y("Product", sort='-x'),
-                    x="Sales",
-                    color=color)
-            ).properties(width=300, height=400).configure_axisX(
-            labelFontSize=0)
-    
+            .encode(y=alt.Y("Product", sort="-x"), x="Sales", color=color)
+        )
+        .properties(width=300, height=400)
+        .configure_axisX(labelFontSize=0)
+    )
+
     with metric_col[0]:
         st.write(
             """
@@ -197,7 +202,9 @@ with st.sidebar:
         st.write(
             """
                 <b>Sales by Product in {city}</b>
-                """.format(city=city),
+                """.format(
+                city=city
+            ),
             unsafe_allow_html=True,
         )
         display_metrics(diff_product_df, 12, "Product")
@@ -208,15 +215,19 @@ with st.sidebar:
                 """,
             unsafe_allow_html=True,
         )
-        sales_bar = alt.Chart(df_by_city_name).mark_bar().encode(
-            y=alt.Y("CityName", sort="-x"),
-            x=alt.Y("Sales", sort='-x'),
-            color=color,
-            tooltip=["CityName", "Sales"],
-        ).properties(width=300, height=400).resolve_scale(
-            color="independent"
-        ).configure_axisX(
-            labelFontSize=0)
+        sales_bar = (
+            alt.Chart(df_by_city_name)
+            .mark_bar()
+            .encode(
+                y=alt.Y("CityName", sort="-x"),
+                x=alt.Y("Sales", sort="-x"),
+                color=color,
+                tooltip=["CityName", "Sales"],
+            )
+            .properties(width=300, height=400)
+            .resolve_scale(color="independent")
+            .configure_axisX(labelFontSize=0)
+        )
         st.altair_chart(sales_bar, use_container_width=True)
     with col[1]:
         st.write(
