@@ -7,11 +7,12 @@ from folium import plugins
 from folium.plugins import HeatMap
 import geocoder
 import geopy
+import altair as alt
 import math
 from streamlit_folium import st_folium
 
 st.set_page_config("EDA", "📊", layout="wide")
-
+st.title("Sales Dashboard - 2019")
 
 def get_df_by_city(df: pd.DataFrame, cities: list):
     return df[df["CityName"].isin(cities)]
@@ -143,9 +144,7 @@ df_by_city_name = df.groupby("CityName")["Sales"].sum().reset_index()
 df_by_city_name = df_by_city_name.sort_values(by="Sales", ascending=True)
 metric_col = st.columns(2, gap="large")
 tseries_col = st.columns(1)
-
-st.title("Sales Dashboard - 2019")
-
+click = alt.selection_multi(encodings=["color"])
 col = st.columns((3, 4.5, 3), gap="medium")
 with st.sidebar:
     city = st.selectbox(
@@ -177,15 +176,15 @@ with st.sidebar:
     diff_product_df = calculate_difference(
         df_city, "Month", "Sales", "Product", [11, 12]
     )
-
-    fig_product = px.bar(
-        sales_by_day,
-        y="Product",
-        x="Sales",
-        title=f"Sales by Product in {city}",
-        color="Sales",
-        color_continuous_scale=px.colors.sequential.Emrld,
-    )
+    color = alt.Color("Sales", scale=alt.Scale(scheme="spectral"), legend=None, type="quantitative")
+    bars = (alt.Chart(data=sales_by_day.sort_values(by="Sales", ascending=False))
+            .mark_bar()
+            .encode(y=alt.Y("Product", sort='-x'),
+                    x="Sales",
+                    color=color)
+            ).properties(width=300, height=400).configure_axisX(
+            labelFontSize=0)
+    
     with metric_col[0]:
         st.write(
             """
@@ -197,22 +196,28 @@ with st.sidebar:
     with metric_col[1]:
         st.write(
             """
-                <b>Top/Bottom Product By Sales</b>
-                """,
+                <b>Sales by Product in {city}</b>
+                """.format(city=city),
             unsafe_allow_html=True,
         )
         display_metrics(diff_product_df, 12, "Product")
     with col[0]:
-        fig_sales = px.bar(
-            df_by_city_name,
-            y="CityName",
-            x="Sales",
-            title="Sales by City",
-            orientation="h",
-            color="Sales",
-            color_continuous_scale=px.colors.sequential.Emrld,
+        st.write(
+            """
+                <b>Sales by City</b>
+                """,
+            unsafe_allow_html=True,
         )
-        st.plotly_chart(fig_sales)
+        sales_bar = alt.Chart(df_by_city_name).mark_bar().encode(
+            y=alt.Y("CityName", sort="-x"),
+            x=alt.Y("Sales", sort='-x'),
+            color=color,
+            tooltip=["CityName", "Sales"],
+        ).properties(width=300, height=400).resolve_scale(
+            color="independent"
+        ).configure_axisX(
+            labelFontSize=0)
+        st.altair_chart(sales_bar, use_container_width=True)
     with col[1]:
         st.write(
             """
@@ -220,23 +225,30 @@ with st.sidebar:
                 """,
             unsafe_allow_html=True,
         )
-        st_folium(create_heatmap(df_city=df_city), width=400, height=300)
+        st_folium(create_heatmap(df_city=df_city), width=400, height=400)
     with col[2]:
-        st.plotly_chart(fig_product)
-
-    with tseries_col[0]:
         st.write(
             """
-                <b>Sales By Day</b>
+                <b>Top Sales By Product</b>
                 """,
             unsafe_allow_html=True,
         )
-        sales_by_day = get_df_by_city(df, [city]).resample("D").sum()
-        fig = px.line(
-            sales_by_day,
-            x=sales_by_day.index,
-            y=f"Sales",
-            title="Sales by day in 2019 for",
-            markers=True,
-        )
-        st.plotly_chart(fig)
+        st.altair_chart(bars, use_container_width=True)
+
+
+st.write(
+    """
+        <b>Sales By Day</b>
+        """,
+    unsafe_allow_html=True,
+)
+sales_by_day = get_df_by_city(df, [city]).resample("D").sum()
+fig = px.line(
+    sales_by_day,
+    x=sales_by_day.index,
+    y="Sales",
+    markers=True,
+    width=900,
+    height=400,
+)
+st.plotly_chart(fig)
