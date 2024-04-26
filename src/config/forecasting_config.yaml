@@ -1,0 +1,4 @@
+csv_path: "data/processed_data/sales_2019.csv"
+model_path: "models/forecasting_model"
+model_path2: "models/model"
+experiment_name: "forecasting_experiment"

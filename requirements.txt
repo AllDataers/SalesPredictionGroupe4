@@ -6,3 +6,4 @@ pandas==1.5.3
 geocoder==1.38.1
 folium==0.15.1
 geopy==2.4.1
+sktime==0.27.0
