@@ -62,7 +62,7 @@ def main():
     with mlflow.start_run():
         mlflow.log_params(config)
         train_job.run()
-        ModelRegistry.save_model(train_pipeline, config.get("model_path2"))
+        ModelRegistry.save_model(forecaster, config.get("model_path2"))
         predictions = train_pipeline.forecast(fh)
         metrics = train_job.evaluate(df_test=df_test, predictions=predictions)
         print(metrics)
