@@ -12,3 +12,4 @@ mlflow==2.4.2
 streamlit==1.32.2
 plotly==5.20.0
 streamlit-folium==0.20.0
+-e .
