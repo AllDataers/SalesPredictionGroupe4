@@ -40,6 +40,21 @@ def get_radius(row, min_value, max_value):
 
 
 @st.cache_data
+def compute_global_sales_avg(df, sales_col: str, quantity_col: str, price_col: str):
+    total_sales = df[sales_col].sum()
+    avg_quantity = df[quantity_col].mean()
+    avg_price = df[price_col].mean()
+
+    return total_sales, avg_quantity, avg_price
+
+
+def global_difference(value_now: float, value_before: float) -> float:
+    if value_before == 0:
+        return 0
+    return (value_now - value_before) / value_before
+
+
+@st.cache_data
 def create_heatmap(df_city):
     top10_df = (
         df_city.drop_duplicates(subset="street")
@@ -78,7 +93,6 @@ def create_heatmap(df_city):
 
 
 def format_number(num):
-    print(num)
     if num >= 1_000_000:
         return (
             f"{num // 1_000_000}M"
@@ -141,11 +155,21 @@ def display_metrics(result_df, time_column, group_column):
 
 df = pd.read_csv("data/processed_data/sales_2019.csv", parse_dates=["OrderDate"])
 df = df.set_index(keys=["OrderDate"])
-df_by_city_name = df.groupby("CityName")["Sales"].sum().reset_index()
+df_nov = df.loc["2019-11-01":"2019-11-30"]
+df_dec = df.loc["2019-12-01":"2019-12-31"]
+evol_nov = compute_global_sales_avg(df_nov.resample("D").sum(), "Sales", "QuantityOrdered", "PriceEach")
+evol_dec = compute_global_sales_avg(df_dec.resample("D").sum(), "Sales", "QuantityOrdered", "PriceEach")
+differences = [
+    global_difference(dec, nov)
+    for dec, nov in zip(evol_dec, evol_nov)
+]
+diff_total_sales, diff_avg_quantity, diff_avg_price = differences
+print(diff_total_sales, diff_avg_quantity, diff_avg_price)
+df_by_city_name = df.groupby("CityName")["Sales"].sum(numeric_only=True).reset_index()
 df_by_city_name = df_by_city_name.sort_values(by="Sales", ascending=True)
-metric_col = st.columns(2, gap="large")
+metric_col = st.columns(3, gap="large")
 tseries_col = st.columns(1)
-click = alt.selection_multi(encodings=["color"])
+click = alt.selection_point(encodings=["color"])
 col = st.columns((3, 4.5, 3), gap="medium")
 with st.sidebar:
     city = st.selectbox(
@@ -156,7 +180,6 @@ with st.sidebar:
     sales_by_day = df_city.groupby("Product")["Sales"].sum().reset_index()
     sales_by_day = sales_by_day.sort_values(by="Sales", ascending=True)
     df_city = df[df["CityName"] == city].copy()
-    print(df_city.columns)
     df_city["street"] = df_city.apply(get_street, axis=1)
     diff_df = df_city.groupby(["Month", "street"], as_index=False).agg(
         sales_month_street=("Sales", "sum")
@@ -208,6 +231,17 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         display_metrics(diff_product_df, 12, "Product")
+        
+    with metric_col[2]:
+        st.write(
+            """
+                <b>Global Sales</b>
+                """,
+            unsafe_allow_html=True,
+        )
+        st.metric(label="Total Sales", value=format_number(evol_dec[0]), delta=f"{diff_total_sales:.2%}")
+        st.metric(label="Average Quantity", value=format_number(evol_dec[1]), delta=f"{diff_avg_quantity:.2%}")
+        st.metric(label="Average Price", value=format_number(evol_dec[2]), delta=f"{diff_avg_price:.2%}")
     with col[0]:
         st.write(
             """
@@ -253,7 +287,7 @@ st.write(
         """,
     unsafe_allow_html=True,
 )
-sales_by_day = get_df_by_city(df, [city]).resample("D").sum()
+sales_by_day = get_df_by_city(df, [city]).resample("D").sum(numeric_only=True)
 fig = px.line(
     sales_by_day,
     x=sales_by_day.index,
