@@ -157,12 +157,13 @@ df = pd.read_csv("data/processed_data/sales_2019.csv", parse_dates=["OrderDate"]
 df = df.set_index(keys=["OrderDate"])
 df_nov = df.loc["2019-11-01":"2019-11-30"]
 df_dec = df.loc["2019-12-01":"2019-12-31"]
-evol_nov = compute_global_sales_avg(df_nov.resample("D").sum(), "Sales", "QuantityOrdered", "PriceEach")
-evol_dec = compute_global_sales_avg(df_dec.resample("D").sum(), "Sales", "QuantityOrdered", "PriceEach")
-differences = [
-    global_difference(dec, nov)
-    for dec, nov in zip(evol_dec, evol_nov)
-]
+evol_nov = compute_global_sales_avg(
+    df_nov.resample("D").sum(), "Sales", "QuantityOrdered", "PriceEach"
+)
+evol_dec = compute_global_sales_avg(
+    df_dec.resample("D").sum(), "Sales", "QuantityOrdered", "PriceEach"
+)
+differences = [global_difference(dec, nov) for dec, nov in zip(evol_dec, evol_nov)]
 diff_total_sales, diff_avg_quantity, diff_avg_price = differences
 print(diff_total_sales, diff_avg_quantity, diff_avg_price)
 df_by_city_name = df.groupby("CityName")["Sales"].sum(numeric_only=True).reset_index()
@@ -231,17 +232,36 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         display_metrics(diff_product_df, 12, "Product")
-        
+
     with metric_col[2]:
-        st.write(
-            """
+        left_col, sales_col, right_col = st.columns(3)
+
+        with sales_col:
+            st.write(
+                """
                 <b>Global Sales</b>
                 """,
-            unsafe_allow_html=True,
-        )
-        st.metric(label="Total Sales", value=format_number(evol_dec[0]), delta=f"{diff_total_sales:.2%}")
-        st.metric(label="Average Quantity", value=format_number(evol_dec[1]), delta=f"{diff_avg_quantity:.2%}")
-        st.metric(label="Average Price", value=format_number(evol_dec[2]), delta=f"{diff_avg_price:.2%}")
+                unsafe_allow_html=True,
+            )
+            st.metric(
+                label="Total Sales",
+                value=format_number(evol_dec[0]),
+                delta=f"{diff_total_sales:.2%}",
+            )
+        avg_qty_col, avg_price_col = st.columns(2)
+        with avg_qty_col:
+            st.metric(
+                label="Average Quantity",
+                value=format_number(evol_dec[1]),
+                delta=f"{diff_avg_quantity:.2%}",
+            )
+        with avg_price_col:
+            st.metric(
+                label="Average Price",
+                value=format_number(evol_dec[2]),
+                delta=f"{diff_avg_price:.2%}",
+            )
+
     with col[0]:
         st.write(
             """
