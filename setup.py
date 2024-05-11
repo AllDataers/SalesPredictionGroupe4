@@ -20,7 +20,7 @@ def read_readme() -> str:
 
 
 def get_requirements() -> List[str]:
-    """Get Python package dependencies from requirements.txt."""
+    """Get Python package dependencies from requirements-dev.txt."""
     with open(get_path("requirements-dev.txt")) as f:
         requirements = f.read().strip().split("\n")
     return requirements

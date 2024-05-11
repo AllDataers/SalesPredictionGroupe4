@@ -37,7 +37,7 @@ The following list describes the project structure:
 
 `docs/`: Documentation related to the project. This could include explanation files, how-to guides, or any relevant documentation.
 
-`requirements.txt`: A file containing the list of Python dependencies required for the project. Create a virtual environment using `Python 3.9` and install these dependencies by running `pip install -r requirements.txt`.
+`requirements-dev.txt`: A file containing the list of Python dependencies required for the project. Create a virtual environment using `Python 3.9` and install these dependencies by running `pip install -r requirements-dev.txt`.
 
 `README.md`: Essential information about the project, including setup instructions, how to use the project, and any additional details required to understand and run the code.
 
